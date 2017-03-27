@@ -30,7 +30,7 @@ inline void MakeCloudDense(PointCloud<PointXYZRGBA> &cloud) {
 	cloud.is_dense = true;
 	for(int j = 0; j < cloud.height; j++) {
 		for(int i = 0; i < cloud.width; i++) {
-			if(_isnan(p->z)) {
+			if(isnan(p->z)) {
 				p->x = float(((float)i - KINECT_CX_D) * KINECT_FX_D);
 				p->y = float(((float)j - KINECT_CY_D) * KINECT_FY_D);
 				p->z = 0;
@@ -46,7 +46,7 @@ inline void MakeCloudDense(PointCloud<PointNormal>::Ptr &cloud) {
 	cloud->is_dense = true;
 	for(int j = 0; j < cloud->height; j++) {
 		for(int i = 0; i < cloud->width; i++) {
-			if(_isnan(p->z)) {
+			if(isnan(p->z)) {
 				p->x = float(((float)i - KINECT_CX_D) * KINECT_FX_D);
 				p->y = float(((float)j - KINECT_CY_D) * KINECT_FY_D);
 				p->z = 0;
@@ -69,11 +69,11 @@ inline void EstimateNormals(const PointCloud<PointXYZRGBA>::ConstPtr &cloud, Poi
 	if(fill) {
 		PointCloudNormal::iterator p = normals->begin();
 		while(p != normals->end()) {
-			if(_isnan(p->normal_x))
+			if(isnan(p->normal_x))
 				p->normal_x = 0;
-			if(_isnan(p->normal_y))
+			if(isnan(p->normal_y))
 				p->normal_y = 0;
-			if(_isnan(p->normal_z))
+			if(isnan(p->normal_z))
 				p->normal_z = 0;
 			++p;
 		}

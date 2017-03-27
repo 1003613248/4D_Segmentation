@@ -1,22 +1,18 @@
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
-SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+project(4D_Segmentation)
+#SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-IF(WIN32 OR win64)
-   SET(CMAKE_FIND_LIBRARY_SUFFIXES .lib .dll)
-ELSE()
-   SET(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-ENDIF()
-
-
-find_package(PCL 1.7 REQUIRED)
-find_package( OpenCV REQUIRED )
+find_package(PCL 1.8 REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(CUDA 8.0 REQUIRED)
  
 project(4D_Segmentation)
 
 add_subdirectory(src)
 
-include_directories(C:/opencv/build)
+include_directories(${OPENCV_INCLUDE_DIRS})
 include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${4D_Segmentation_SOURCE_DIR}/include)
 

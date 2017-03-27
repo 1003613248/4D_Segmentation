@@ -25,8 +25,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 #include "Edges.h"
 #include "Segments.h"
 #include "RegionTree.h"
-#include <amp.h>
-#include <amp_math.h>
+//#include <amp.h>
+//#include <amp_math.h>
 
 typedef struct
 {
