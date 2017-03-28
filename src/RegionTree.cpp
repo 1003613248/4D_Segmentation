@@ -111,12 +111,12 @@ LABXYZ::LABXYZ(int r_val, int g_val, int b_val, float x_val, float y_val, float 
 }
 
 
-inline void Region3D::InitializeRegion(PointXYZI *in, Vec3b &color, const pcl::PointNormal &normal, const int label, const int i, const int j, const int level) {
+inline void Region3D::InitializeRegion(PointXYZI &in, Vec3b &color, const pcl::PointNormal &normal, const int label, const int i, const int j, const int level) {
 	//if(!_isnan(in->z)) {
 	m_level  = level;
 	m_size = 1;
 	m_hist = new LABXYZUVW[NUM_BINS_XYZ]();
-	LABXYZUVW labxyz = LABXYZUVW(color[2],color[1],color[0],in->x, in->y, in->z,normal.normal_x,normal.normal_y,normal.normal_z);
+	LABXYZUVW labxyz = LABXYZUVW(color[2],color[1],color[0],in.x, in.y, in.z,normal.normal_x,normal.normal_y,normal.normal_z);
 	m_hist[Clamp(Round(labxyz.l * HIST_MUL_L),0,NUM_BINS)].l++;
 	m_hist[Clamp(Round(labxyz.a * HIST_MUL_A),0,NUM_BINS)].a++;
 	m_hist[Clamp(Round(labxyz.b * HIST_MUL_B),0,NUM_BINS)].b++;
@@ -130,13 +130,13 @@ inline void Region3D::InitializeRegion(PointXYZI *in, Vec3b &color, const pcl::P
 	if(!isnan(labxyz.w))
 		m_hist[Clamp(Round(labxyz.w * HIST_MUL_N),0,NUM_BINS)].w++;
 	m_centroid = Point(i,j);
-	m_centroid3D.x = m_min3D.x = m_max3D.x = in->x;
-	m_centroid3D.y = m_min3D.y = m_max3D.y = in->y;
-	m_centroid3D.z = m_min3D.z = m_max3D.z = in->z;
+	m_centroid3D.x = m_min3D.x = m_max3D.x = in.x;
+	m_centroid3D.y = m_min3D.y = m_max3D.y = in.y;
+	m_centroid3D.z = m_min3D.z = m_max3D.z = in.z;
 	m_centroid3D.intensity = label;
 	m_nodes.reserve(76800);
 	m_neighbors.reserve(8);
-	m_nodes.push_back(in);
+	m_nodes.push_back(&in);
 	m_regions[0] = m_regions[1] = NULL;
 	m_numRegions = 0;
 	//}
@@ -210,9 +210,9 @@ inline void Region3D::InitializeRegion(Region3D *node1, Region3D *node2, int lev
 	m_regions[1] = node2;
 }
 
-inline void Region3D::AddNode(PointXYZI *in, Vec3b &color, const pcl::PointNormal &normal, const int i, const int j) {
+inline void Region3D::AddNode(PointXYZI &in, Vec3b &color, const pcl::PointNormal &normal, const int i, const int j) {
 	//if(!isnan(in->z)) {
-	LABXYZUVW labxyz = LABXYZUVW(color[2],color[1],color[0],in->x,in->y,in->z,normal.normal_x,normal.normal_y,normal.normal_z);
+	LABXYZUVW labxyz = LABXYZUVW(color[2],color[1],color[0],in.x,in.y,in.z,normal.normal_x,normal.normal_y,normal.normal_z);
 	m_hist[Clamp(Round(labxyz.l * HIST_MUL_L), 0, NUM_BINS)].l++;
 	m_hist[Clamp(Round(labxyz.a * HIST_MUL_A), 0, NUM_BINS)].a++;
 	m_hist[Clamp(Round(labxyz.b * HIST_MUL_B), 0, NUM_BINS)].b++;
@@ -228,30 +228,30 @@ inline void Region3D::AddNode(PointXYZI *in, Vec3b &color, const pcl::PointNorma
 	m_size++;
 	m_centroid.x += i;
 	m_centroid.y += j;
-	m_centroid3D.x += in->x;
-	m_centroid3D.y += in->y;
-	m_centroid3D.z += in->z;
-	m_nodes.push_back(in);
-	if(m_min3D.x > in->x)
-		m_min3D.x = in->x;
-	if(m_min3D.y > in->y)
-		m_min3D.y = in->y;
-	if(m_min3D.z > in->z)
-		m_min3D.z = in->z;
-	if(m_max3D.x < in->x)
-		m_max3D.x = in->x;
-	if(m_max3D.y < in->y)
-		m_max3D.y = in->y;
-	if(m_max3D.z < in->z)
-		m_max3D.z = in->z;
+	m_centroid3D.x += in.x;
+	m_centroid3D.y += in.y;
+	m_centroid3D.z += in.z;
+	m_nodes.push_back(&in);
+	if(m_min3D.x > in.x)
+		m_min3D.x = in.x;
+	if(m_min3D.y > in.y)
+		m_min3D.y = in.y;
+	if(m_min3D.z > in.z)
+		m_min3D.z = in.z;
+	if(m_max3D.x < in.x)
+		m_max3D.x = in.x;
+	if(m_max3D.y < in.y)
+		m_max3D.y = in.y;
+	if(m_max3D.z < in.z)
+		m_max3D.z = in.z;
 	//}
 }
 
-inline void Region4DBig::InitializeRegion(PointXYZI *in, Vec3b &color, const Normal &flow, const int label, const int i, const int j, const int level) {
+inline void Region4DBig::InitializeRegion(PointXYZI &in, Vec3b &color, const Normal &flow, const int label, const int i, const int j, const int level) {
 	m_level  = level;
 	m_size = 1;
 	m_hist = new LABXYZUVW[NUM_BINS_XYZ]();
-	LABXYZUVW labxyzuvw = LABXYZUVW(color[2],color[1],color[0],in->x, in->y, in->z, flow.normal_x, flow.normal_y, flow.normal_z);
+	LABXYZUVW labxyzuvw = LABXYZUVW(color[2],color[1],color[0],in.x, in.y, in.z, flow.normal_x, flow.normal_y, flow.normal_z);
 	m_hist[Clamp(Round(labxyzuvw.l * HIST_MUL_L),0,NUM_BINS)].l++;
 	m_hist[Clamp(Round(labxyzuvw.a * HIST_MUL_A),0,NUM_BINS)].a++;
 	m_hist[Clamp(Round(labxyzuvw.b * HIST_MUL_B),0,NUM_BINS)].b++;
@@ -263,13 +263,13 @@ inline void Region4DBig::InitializeRegion(PointXYZI *in, Vec3b &color, const Nor
 	m_hist[Clamp(Round(labxyzuvw.v * HIST_MUL_OF),0,NUM_BINS)].v++;
 	m_hist[Clamp(Round(labxyzuvw.w * HIST_MUL_OF),0,NUM_BINS)].w++;
 	m_centroid = Point(i,j);
-	m_centroid3D.x = in->x;
-	m_centroid3D.y = in->y;
-	m_centroid3D.z = in->z;
+	m_centroid3D.x = in.x;
+	m_centroid3D.y = in.y;
+	m_centroid3D.z = in.z;
 	m_centroid3D.intensity = label;
 	m_nodes.reserve(76800);
 	m_neighbors.reserve(8);
-	m_nodes.push_back(in);
+	m_nodes.push_back(&in);
 	m_regions[0] = m_regions[1] = NULL;
 	m_numRegions = 0;
 }
@@ -327,8 +327,8 @@ inline void Region4DBig::InitializeRegion(Region4DBig *node1, Region4DBig *node2
 	m_regions[1] = node2;
 }
 
-inline void Region4DBig::AddNode(PointXYZI *in, Vec3b &color, const Normal &flow, const int i, const int j) {
-	LABXYZUVW labxyzuvw = LABXYZUVW(color[2],color[1],color[0],in->x, in->y, in->z, flow.normal_x, flow.normal_y, flow.normal_z);
+inline void Region4DBig::AddNode(PointXYZI &in, Vec3b &color, const Normal &flow, const int i, const int j) {
+	LABXYZUVW labxyzuvw = LABXYZUVW(color[2],color[1],color[0],in.x, in.y, in.z, flow.normal_x, flow.normal_y, flow.normal_z);
 	m_hist[Clamp(Round(labxyzuvw.l * HIST_MUL_L),0,NUM_BINS)].l++;
 	m_hist[Clamp(Round(labxyzuvw.a * HIST_MUL_A),0,NUM_BINS)].a++;
 	m_hist[Clamp(Round(labxyzuvw.b * HIST_MUL_B),0,NUM_BINS)].b++;
@@ -349,22 +349,22 @@ inline void Region4DBig::AddNode(PointXYZI *in, Vec3b &color, const Normal &flow
 	m_size++;
 	m_centroid.x += i;
 	m_centroid.y += j;
-	m_centroid3D.x += in->x;
-	m_centroid3D.y += in->y;
-	m_centroid3D.z += in->z;
-	m_nodes.push_back(in);
-	if(m_min3D.x > in->x)
-		m_min3D.x = in->x;
-	if(m_min3D.y > in->y)
-		m_min3D.y = in->y;
-	if(m_min3D.z > in->z)
-		m_min3D.z = in->z;
-	if(m_max3D.x < in->x)
-		m_max3D.x = in->x;
-	if(m_max3D.y < in->y)
-		m_max3D.y = in->y;
-	if(m_max3D.z < in->z)
-		m_max3D.z = in->z;
+	m_centroid3D.x += in.x;
+	m_centroid3D.y += in.y;
+	m_centroid3D.z += in.z;
+	m_nodes.push_back(&in);
+	if(m_min3D.x > in.x)
+		m_min3D.x = in.x;
+	if(m_min3D.y > in.y)
+		m_min3D.y = in.y;
+	if(m_min3D.z > in.z)
+		m_min3D.z = in.z;
+	if(m_max3D.x < in.x)
+		m_max3D.x = in.x;
+	if(m_max3D.y < in.y)
+		m_max3D.y = in.y;
+	if(m_max3D.z < in.z)
+		m_max3D.z = in.z;
 }
 
 
@@ -420,7 +420,8 @@ void RegionTree3D::Create(const PointCloudBgr &in, PointCloudInt &labels, const 
 					printf("Vector out of range\n");
 				}
 				region_list[numRegions] = new Region3D();
-				region_list[numRegions]->InitializeRegion(pLabel, Vec3b(pIn->b,pIn->g,pIn->r), *pNormal, current + start_label, i, j, 1);
+				Vec3b Colour(pIn->b,pIn->g,pIn->r);
+				region_list[numRegions]->InitializeRegion(*pLabel, Colour, *pNormal, current + start_label, i, j, 1);
 				pRegion = region_list[numRegions];
 				if(current >= totRegions) {
 					printf("Vector out of range\n");
@@ -447,7 +448,9 @@ void RegionTree3D::Create(const PointCloudBgr &in, PointCloudInt &labels, const 
 			loc = lookup[int(pLabel->intensity)];
 			pRegion = region_list[loc];
 			assert(pRegion != NULL);
-			region_list[loc]->AddNode(pLabel._Ptr, Vec3b(pIn->b,pIn->g,pIn->r),*pNormal,i,j);
+
+			Vec3b Colour_0(pIn->b,pIn->g,pIn->r);
+			region_list[loc]->AddNode(*pLabel, Colour_0,*pNormal,i,j);
 			//Check for neighbors
 			if(i < safeWidth) {
 				label = lookup[int((pLabel + 1)->intensity)];
@@ -543,7 +546,8 @@ void RegionTree4DBig::Create(deque<PointCloudBgr> &in, deque< pcl::PointCloud<pc
 					region_list[numRegions] = new Region4DBig();
 					pRegion = (region_list[numRegions]);
 					//pRegion->InitializeRegion(pLabel, pIn->intensity, pLabel->intensity, i, j, 1);
-					region_list[numRegions]->InitializeRegion(pLabel._Ptr, Vec3b(pIn->b,pIn->g,pIn->r), *pFlow, current + start_label, i, j, 1);
+					Vec3b Colour_1(pIn->b,pIn->g,pIn->r);
+					region_list[numRegions]->InitializeRegion(*pLabel, Colour_1, *pFlow, current + start_label, i, j, 1);
 					if(current >= totRegions) {
 						printf("Vector out of range\n");
 					}
@@ -568,7 +572,8 @@ void RegionTree4DBig::Create(deque<PointCloudBgr> &in, deque< pcl::PointCloud<pc
 				loc = lookup[int(pLabel->intensity)];
 				pRegion = (region_list[loc]);
 				assert(pRegion != NULL);
-				region_list[loc]->AddNode(pLabel._Ptr,Vec3b(pIn->b,pIn->g,pIn->r),*pFlow,i,j);
+				Vec3b colour_2(pIn->b,pIn->g,pIn->r);
+				region_list[loc]->AddNode(*pLabel, colour_2,*pFlow,i,j);
 				//Check for neighbors
 				if(i < safeWidth) {
 					label = lookup[int((pLabel + 1)->intensity)];
