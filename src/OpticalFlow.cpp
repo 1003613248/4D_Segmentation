@@ -9,6 +9,7 @@ void ComputeOpticalFlow(const Mat &past, const Mat &current, const PointCloud<Po
 	Mat in1, in2, flow2d;
 	cvtColor(past,in1,CV_BGR2GRAY);
 	cvtColor(current,in2,CV_BGR2GRAY);
+	//opencv dense optical flow method; basing on Gunnar Farneback 's Polynomial Expansion method; VGA may take 200ms/per frame
 	calcOpticalFlowFarneback(in1,in2,flow2d,0.5f,2,5,2,7,1.5,0);
 	flow->height = flow2d.rows;
 	flow->width = flow2d.cols;
