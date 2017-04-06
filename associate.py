@@ -46,6 +46,7 @@ import os
 import numpy
 
 import generate_pointcloud
+from subprocess import call
 
 def read_file_list(filename):
     """
@@ -123,7 +124,14 @@ if __name__ == '__main__':
         for a,b in matches:
             print("%f %s"%(a," ".join(first_list[a])))
     else:
+	I  = 1
         for a,b in matches:
             print("%f %s %f %s"%(a," ".join(first_list[a]),b-float(args.offset)," ".join(second_list[b])))
 	   # print("%f %f %f %f"%(a,a,b,b))
             generate_pointcloud.generate_pointcloud(open("/".join(first_list[a])), open("/".join(second_list[b])), str(str(a)+".ply") )  
+	    ply = str(str(a)+".ply")
+	    pcd = str(str(I)+".pcd")
+	    command = 'pcl_ply2pcd {0} {1}'.format(ply, pcd)
+            call(command.split(), shell=False)
+	    I=I+1
+
