@@ -127,11 +127,13 @@ if __name__ == '__main__':
 	I  = 1
         for a,b in matches:
             print("%f %s %f %s"%(a," ".join(first_list[a]),b-float(args.offset)," ".join(second_list[b])))
-	   # print("%f %f %f %f"%(a,a,b,b))
-            generate_pointcloud.generate_pointcloud(open("/".join(first_list[a])), open("/".join(second_list[b])), str(str(a)+".ply") )  
-	    ply = str(str(a)+".ply")
+#            generate_pointcloud.generate_pointcloud(open("/".join(first_list[a])), open("/".join(second_list[b])), str(str(a)+".ply") )  
+	   # ply = str(str(a)+".ply")
+	    rgbpng = "/".join(first_list[a])
+	    depthpng = "/".join(second_list[b])
 	    pcd = str(str(I)+".pcd")
-	    command = 'pcl_ply2pcd {0} {1}'.format(ply, pcd)
+#	    command = 'pcl_ply2pcd {0} {1}'.format(ply, pcd)
+	    command = 'pcl_png2pcd --intensity_type FLOAT {0} {1} {2}'.format(rgbpng, depthpng, pcd)  
             call(command.split(), shell=False)
 	    I=I+1
 
