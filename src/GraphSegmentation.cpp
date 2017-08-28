@@ -45,7 +45,7 @@ void normalize(std::vector<float> &mask)
 	int i;
 	for (i = 1; i < len; i++) 
 	{
-		sum += fabsf(mask[i]);
+		sum += fabsf(mask[i]);//fabsf(); float absolute value /z
 	}
 	sum = 2*sum + fabsf(mask[0]);
 	for (i = 0; i < len; i++)
@@ -55,7 +55,7 @@ void normalize(std::vector<float> &mask)
 }
 
 /* convolve src with mask.  dst is flipped! */
-void convolve_even(Mat& src, Mat &dst, std::vector<float> &mask)
+void convolve_even(Mat& src, Mat &dst, std::vector<float> &mask)//低通滤波器 平滑图像/z
 {
 	int width = src.cols;
 	int height = src.rows;
@@ -84,7 +84,7 @@ void iExtractRGBDColorSpace(const PointCloud<PointXYZRGBA>& in, Mat &B, Mat &G, 
 		*pB = (float)pI->b;
 		*pG = (float)pI->g;
 		*pR = (float)pI->r;
-		*pD = 1000.0f*pI->z;
+		*pD = 1000.0f*pI->z;//m -> mm ???/z
 		pI++; pB++; pG++; pR++; pD++;
 	}
 }
@@ -124,7 +124,7 @@ void iBuildGraph(const PointCloud<PointXYZRGBA> &in,
 	int safeWidth = width - 1, safeHeight = height - 1;
 	int reserve_size = in.size()*8;
 	//printf("Reserve size = %d\n",reserve_size);
-	edges = (Edge3D*) malloc(reserve_size*sizeof(Edge3D));
+	edges = (Edge3D*) malloc(reserve_size*sizeof(Edge3D));//dynamic mem allocation//z
 	if(edges == NULL) {
 		printf("Error, could not malloc\n");
 		return;

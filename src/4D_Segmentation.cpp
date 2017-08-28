@@ -25,6 +25,8 @@ using namespace std;
 using namespace pcl;
 using namespace cv;
 
+///////////////////////////////KINECT Calibration Matrix fx fy cx xy//////////////////////////////
+
 inline void MakeCloudDense(PointCloud<PointXYZRGBA> &cloud) {
 	PointCloud<PointXYZRGBA>::iterator p = cloud.begin();
 	cloud.is_dense = true;
@@ -59,6 +61,8 @@ inline void MakeCloudDense(PointCloud<PointNormal>::Ptr &cloud) {
 	}
 }
 
+////////////////////////integral image normal estimation , can be paralleled, TODO///but in the test example, he didn't use Normals
+
 inline void EstimateNormals(const PointCloud<PointXYZRGBA>::ConstPtr &cloud, PointCloud<PointNormal>::Ptr &normals, bool fill) {
 	pcl::IntegralImageNormalEstimation<pcl::PointXYZRGBA, pcl::PointNormal> ne;
 	ne.setNormalEstimationMethod (ne.AVERAGE_3D_GRADIENT);
@@ -81,28 +85,28 @@ inline void EstimateNormals(const PointCloud<PointXYZRGBA>::ConstPtr &cloud, Poi
 }
 
 void RGBDTSegmentation::AddSlice(const PointCloud<PointXYZRGBA>::ConstPtr &in, 
-								 pcl::PointCloud<pcl::PointXYZI>::Ptr &out,
-								 pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &out_color) {
-									 boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > cloud(new pcl::PointCloud<pcl::PointXYZRGBA>);
-									 copyPointCloud(*in,*cloud);
-									 MakeCloudDense(*cloud);
-									 if(options.use_time) {
-										 if(options.use_fast_method || options.number_of_frames == 1) {
-											 seg3d.AddSlice(*cloud, options.sigma_depth, options.c_depth, options.depth_min_size, options.sigma_color, options.c_color, options.color_min_size, out, out_color);
-										 } else {
-											 seg4d.AddSlice(*cloud, options.sigma_depth, options.c_depth, options.depth_min_size, options.max_depth, options.sigma_color, options.c_color, options.color_min_size);
-											 *out = seg4d.labels[curr];
-											 *out_color = seg4d.labels_colored[curr];
-											 ++curr;
-											 if(curr == 8)
-												 curr = 4;
-										 }
-									 } else if(options.use_normals) {
-										 boost::shared_ptr<pcl::PointCloud<pcl::PointNormal> > normals;
-										 EstimateNormals(cloud, normals, false);
-										 MakeCloudDense(normals);
-										 SegmentColorAndNormals(*cloud, normals, options.sigma_depth, options.sigma_color, options.c_normals, options.normals_min_size, out, out_color);
-									 } else {
-										 SHGraphSegment(*cloud, options.sigma_depth, options.c_depth, options.depth_min_size, options.sigma_color, options.c_color, options.color_min_size, out, out_color);
-									 }
+		pcl::PointCloud<pcl::PointXYZI>::Ptr &out,
+		pcl::PointCloud<pcl::PointXYZRGBA>::Ptr &out_color) {
+	boost::shared_ptr<pcl::PointCloud<pcl::PointXYZRGBA> > cloud(new pcl::PointCloud<pcl::PointXYZRGBA>);
+	copyPointCloud(*in,*cloud);
+	MakeCloudDense(*cloud);
+	if(options.use_time) {
+		if(options.use_fast_method || options.number_of_frames == 1) {
+			seg3d.AddSlice(*cloud, options.sigma_depth, options.c_depth, options.depth_min_size, options.sigma_color, options.c_color, options.color_min_size, out, out_color);
+		} else {
+			seg4d.AddSlice(*cloud, options.sigma_depth, options.c_depth, options.depth_min_size, options.max_depth, options.sigma_color, options.c_color, options.color_min_size);
+			*out = seg4d.labels[curr];
+			*out_color = seg4d.labels_colored[curr];
+			++curr;
+			if(curr == 8)
+				curr = 4;
+		}
+	} else if(options.use_normals) {
+		boost::shared_ptr<pcl::PointCloud<pcl::PointNormal> > normals;
+		EstimateNormals(cloud, normals, false);
+		MakeCloudDense(normals);
+		SegmentColorAndNormals(*cloud, normals, options.sigma_depth, options.sigma_color, options.c_normals, options.normals_min_size, out, out_color);
+	} else {
+		SHGraphSegment(*cloud, options.sigma_depth, options.c_depth, options.depth_min_size, options.sigma_color, options.c_color, options.color_min_size, out, out_color);
+	}
 }
