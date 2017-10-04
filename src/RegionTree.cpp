@@ -43,7 +43,7 @@ inline void LAB::RGB2XYZ(int r, int g, int b, float *x, float *y, float *z) {
 	gg *= 100.0f;
 	bb *= 100.0f;
 
-	//Observer. = 2°, Illuminant = D65
+	//Observer. = 2ï¿½, Illuminant = D65
 	*x = rr * 0.4124f + gg * 0.3576f + bb * 0.1805f;
 	*y = rr * 0.2126f + gg * 0.7152f + bb * 0.0722f;
 	*z = rr * 0.0193f + gg * 0.1192f + bb * 0.9505f;

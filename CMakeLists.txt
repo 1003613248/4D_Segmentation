@@ -18,12 +18,22 @@ include_directories(${OPENCV_INCLUDE_DIRS})
 include_directories(${TBB_INCLUDE_DIRS})
 include_directories(${PCL_INCLUDE_DIRS})
 include_directories(${4D_Segmentation_SOURCE_DIR}/include)
+include_directories(${CUDA_INCLUDE_DIRS})
 
 link_directories(${PCL_LIBRARY_DIRS})
 link_directories(${TBB_LIBRARY_DIRS})
+link_directories(${CUDA_LIBRARY_DIRS})
 
 add_definitions(${PCL_DEFINITIONS})
 add_definitions(${TBB_DEFINITIONS})
+add_definitions(${CUDA_DEFINITIONS})
+
+set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -gencode arch=compute_30,code=sm_30)
+
+file( GLOB  cu  *.cu)
+cuda_add_executable( vector src/vector_add.cu ${cu} )
+#target_link_libraries(vector_add ${CUDA_LIBRARIES})
+
 
 file(GLOB_RECURSE 4D_Segmentation_HEADERS include/*.h)
 file(GLOB_RECURSE 4D_Segmentation_SOURCES src/*.cpp)
@@ -41,3 +51,4 @@ target_link_libraries (4D_Segmentation ${PCL_LIBRARIES} ${OpenCV_LIBS} ${TBB_LIB
 
 add_executable (Test_Seg src/TestVideoSegmentation.cpp ${4D_Segmentation_HEADERS})
 target_link_libraries (Test_Seg 4D_Segmentation ${PCL_LIBRARIES} ${OpenCV_LIBS} tbb)
+

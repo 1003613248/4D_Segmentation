@@ -1186,9 +1186,15 @@ int Segment4DBig::AddSlice(
 			flows.push_back(tmp_flow);
 		} else {
 			//printf("Computing flow\n");
+			std::cout<<"11111\n";
 			PointCloud<Normal> tmp_flow;
 			PointCloudBgr tmp_cloud = *(clouds.rbegin() + 1);
 			ComputeOpticalFlow(tmp_cloud, in, &tmp_flow);
+	//		PointCloudBgr::Ptr ptr_cloud(&tmp_cloud);
+	//		PointCloud<Normal>::Ptr ptr_flow(&tmp_flow);
+	//		PointCloudBgr::Ptr ptr_in(new PointCloudBgr);
+	//		*ptr_in = in;
+		//	ComputeOpticalFlowGPU(ptr_cloud, ptr_in, ptr_flow);
 			flows.push_back(tmp_flow);
 		}
 		if(clouds.size() > NUM_FRAMES) {
@@ -1299,10 +1305,20 @@ int Segment4DBig::AddSlice(
 			Set(&tmp_flow, zero);
 			flows.push_back(tmp_flow);
 		} else {
-			//printf("Computing flow\n");
+		//	printf("Computing flow\n");
 			PointCloud<Normal> tmp_flow;
 			PointCloudBgr tmp_cloud = *(clouds.rbegin() + 1);
+			PointCloudBgr::Ptr ptr_cloud(new PointCloudBgr);
+			*ptr_cloud = tmp_cloud;
+			PointCloud<Normal>::Ptr ptr_flow(new PointCloud<Normal>);
+			*ptr_flow = tmp_flow; 
+			PointCloudBgr::Ptr ptr_in(new PointCloudBgr);
+			*ptr_in = in;
+	//		ComputeOpticalFlowGPU(ptr_cloud, ptr_in, ptr_flow);
+			const int64 start = getTickCount();
 			ComputeOpticalFlow(tmp_cloud, in, &tmp_flow);
+			const double timeSec = (getTickCount() - start) / getTickFrequency();
+			cout << "GPU OF : " << timeSec << " sec" << endl;
 			flows.push_back(tmp_flow);
 		}
 		if(clouds.size() > NUM_FRAMES) {
