@@ -1,6 +1,8 @@
 #include "GraphSegmentation.h"
 //#include "RegionTree.h"
 
+//#include "cuFilter.h"
+
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #endif
@@ -104,11 +106,14 @@ void iExtractNormals(const PointCloud<PointNormal>& in, Mat &X, Mat &Y, Mat &Z) 
 }
 
 void iSmooth(Mat &src, float sigma, Mat &out) {
+			const int64 start = getTickCount();
 	std::vector<float> mask = make_fgauss(sigma);
 	normalize(mask);
 	Mat tmp(src.rows, src.cols, src.type());
 	convolve_even(src, tmp, mask);
 	convolve_even(tmp, out, mask);
+			const double timeSec = (getTickCount() - start) / getTickFrequency();
+			cout << "1 call iSmooth time : " << timeSec << " sec" << endl;
 }
 
 void iBuildGraph(const PointCloud<PointXYZRGBA> &in,
@@ -135,6 +140,7 @@ void iBuildGraph(const PointCloud<PointXYZRGBA> &in,
 	iSmooth(G, sigma_color, smooth_g);
 	iSmooth(R, sigma_color, smooth_r);
 	iSmooth(D, sigma_depth, smooth_d);
+printf("iBuild pcd 4 times");
 
 	//Normalize
 	//PointCloud<Bgr> norm;
@@ -422,6 +428,7 @@ void iBuildGraph(const deque< PointCloud<PointXYZRGBA> > &clouds,
 		iSmooth(B, sigma_color, smooth_b);
 		iSmooth(G, sigma_color, smooth_g);
 		iSmooth(R, sigma_color, smooth_r);
+printf("iBuild deque 3 times");
 		if(sigma_depth == 0)
 			smooth_d = D;
 		else

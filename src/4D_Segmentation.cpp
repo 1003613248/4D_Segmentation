@@ -26,6 +26,7 @@ using namespace pcl;
 using namespace cv;
 
 ///////////////////////////////KINECT Calibration Matrix fx fy cx xy//////////////////////////////
+//this MakeCloudDense project all NAN points to z = 0 plane / zhang
 
 inline void MakeCloudDense(PointCloud<PointXYZRGBA> &cloud) {
 	PointCloud<PointXYZRGBA>::iterator p = cloud.begin();
