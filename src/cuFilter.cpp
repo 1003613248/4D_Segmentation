@@ -1,6 +1,4 @@
 #pragma waring(disable:4819)
-
-
 #include<stdlib.h>
 #include<stdio.h>
 #include<math.h>
@@ -54,7 +52,7 @@ const char *sReference[] =
 };
 
 const char *image_filename = "lena.ppm";
-float sigma = 10.0f;
+float sigma = 1.0f;
 int order = 0;
 int nthreads = 64;  // number of threads per block
 
@@ -117,6 +115,7 @@ void display()
     unsigned int *d_result;
     checkCudaErrors(cudaGLMapBufferObject((void **)&d_result, pbo));
     gaussianFilterRGBA(d_img, d_result, d_temp, width, height, sigma, order, nthreads);
+//device result in d_result
     checkCudaErrors(cudaGLUnmapBufferObject(pbo));
 
     // load texture from pbo
@@ -404,6 +403,7 @@ main(int argc, char **argv)
 
     printf("NOTE: The CUDA Samples are not meant for performance measurements. Results may vary when GPU Boost is enabled.\n\n");
 
+for(int n = 1;n<= 827; n++){
     // use command-line specified CUDA device, otherwise use device with highest Gflops/s
     if (argc > 1)
     {
@@ -422,17 +422,23 @@ main(int argc, char **argv)
         image_filename = filename;
     }
 
-    // load image
-    char *image_path = sdkFindFilePath(image_filename, argv[0]);
 
-    if (image_path == NULL)
+    // load image
+
+char image_path[1024];
+sprintf(image_path, "/home/wine/rgbd_dataset_freiburg3_walking_xyz/rgbppm/%d.ppm", n);
+
+   // char *image_path = sdkFindFilePath(image_filename, argv[0]);
+//    char *image_path = sdkFindFilePath(image_filename, argv[0]);
+
+   /* if (image_path == NULL)
     {
-        fprintf(stderr, "Error unable to find and load image file: '%s'\n", image_filename);
+        fprintf(stderr, "Error unable to find and load image file: '%s'\n", image_filename);//image_filename;
         exit(EXIT_FAILURE);
     }
-
+*/
     sdkLoadPPM4ub(image_path, (unsigned char **)&h_img, &width, &height);
-
+															
     if (!h_img)
     {
         printf("Error unable to load PPM file: '%s'\n", image_path);
@@ -474,32 +480,31 @@ main(int argc, char **argv)
     {
         // First initialize OpenGL context, so we can properly set the GL for CUDA.
         // This is necessary in order to achieve optimal performance with OpenGL/CUDA interop.
-        initGL(&argc, argv);
-        findCudaGLDevice(argc, (const char **)argv);
+//        initGL(&argc, argv);
+//        findCudaGLDevice(argc, (const char **)argv);
     }
 
     initCudaBuffers();
+   // initGLBuffers();
+  //  glutMainLoop();
 
-    if (ref_file)
-    {
-        printf("(Automated Testing)\n");
-        bool testPassed = runSingleTest(ref_file, argv[0]);
+    // allocate memory for result
+    unsigned int *d_result;
+    unsigned int size = width * height * sizeof(unsigned int);
+    checkCudaErrors(cudaMalloc((void **) &d_result, size));
 
-        cleanup();
-        exit(testPassed ? EXIT_SUCCESS : EXIT_FAILURE);
-    }
+    // warm-up
+    gaussianFilterRGBA(d_img, d_result, d_temp, width, height, sigma, order, nthreads);
 
-    if (runBenchmark)
-    {
-        printf("(Run Benchmark)\n");
-        benchmark(100);
+    checkCudaErrors(cudaDeviceSynchronize());
+    unsigned char *h_result = (unsigned char *)malloc(width*height*4);
+    checkCudaErrors(cudaMemcpy(h_result, d_result, width*height*4, cudaMemcpyDeviceToHost));
 
-        cleanup();
-        exit(EXIT_SUCCESS);
-    }
-
-    initGLBuffers();
-    glutMainLoop();
-
+    char dump_file[1024];
+    sprintf(dump_file, "%d.ppm",  n);
+    sdkSavePPM4ub(dump_file, h_result, width, height);
+cudaFree(d_result);
+free(h_result);
+}
     exit(EXIT_SUCCESS);
 }

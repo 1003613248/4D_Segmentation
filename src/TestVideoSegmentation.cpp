@@ -18,9 +18,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 // TestVideoSegmentation.cpp : Defines the entry point for the console application.
 //
+#pragma waring(disable:4819)
 
 #include "TestVideoSegmentation.h"
-
+//#include <cuda_runtime.h>
+//#include <helper_cuda.h>
 using namespace std;
 using namespace pcl;
 using namespace cv;
@@ -116,9 +118,15 @@ public:
 };
 
 int main (int argc, char** argv) {
+	//	int device;
+//	cudaGetDevice(&device);
+//
+//	cudaMemcpy(d_v, &a, sizeof(int), cudaMemcpyHostToDevice);
+//cudaFree(d_v);
+//	cudaFree(d_1);
 	try {
 		SegViewer example;
-		example.run(argv[1]);
+	example.run(argv[1]);
 		cout << "Done" << endl;
 	} catch (pcl::PCLException e) {
 		cout << e.detailedMessage() << endl;

@@ -1,7 +1,7 @@
 #include "GraphSegmentation.h"
 //#include "RegionTree.h"
 
-//#include "cuFilter.h"
+#include "cuFilter.h"
 
 #ifndef max
 #define max(a,b) ((a) > (b) ? (a) : (b))
@@ -16,7 +16,49 @@
 
 template <class T>
 inline T square(const T &x) { return x*x; }; 
+/*cuda filter*/
+unsigned int *d_temp =  NULL;
+unsigned int *d_img = NULL;
+//host img address
+unsigned int *h_img = NULL;
+//unsigned int cu_width, cu_height;
+float sigma_color = 0.8;
 
+//TODO handle the input ppm 
+const char *image_path = "1.ppm";
+int nthreads = 64; // no. of threads of per block
+int order = 0;
+
+extern "C"
+void gaussianFilterRGBA(unsigned int *d_src, unsigned int *d_dest, unsigned int *d_temp, int width, int height, float sigma, int order, int nthreads);
+
+extern "C" 
+void cleanup();
+
+void initCudaBuffers(int cu_width, int cu_height ) {
+unsigned int size = cu_width*cu_height* sizeof(unsigned int);
+//allocate device mem
+//printf("size %d=%d * %d *%d\n", size, cu_width, cu_height, sizeof(unsigned int));
+size_t si =  size;
+size_t available, total;
+//cudaMemGetInfo(&available, &total);
+printf("here\n");
+
+d_img = (unsigned int *)malloc(si);
+printf("here\n");
+//printf("total %d, availoable %d\n", total, available);
+unsigned int *d_im;
+//checkCudaErrors(cudaMalloc((void **)&d_im, si));
+printf("here\n");
+//cudaMalloc((void **) &d_im, 1);
+//checkCudaErrors(cudaMalloc((void **) &d_temp, size));
+
+//checkCudaErrors(cudaMemcpy(d_img, h_img, size, cudaMemcpyHostToDevice));
+printf("here\n");
+
+//sdkCreateTimer(&timer);
+
+}
 /* make filters */
 #define MAKE_FILTER(name, fun)                                \
 	std::vector<float> make_ ## name (float sigma)       \
@@ -39,6 +81,33 @@ using namespace pcl;
 using namespace cv;
 
 using namespace tbb;
+
+inline bool readPCD2RGBA(const PointCloud<PointXYZRGBA> &cloud, unsigned char** data, int &w, int &h)
+{	
+//	unsigned char *idata = 0;
+	PointCloud<PointXYZRGBA>::const_iterator itr =  cloud.begin();
+	unsigned int channels =3;
+	int size = w * h;
+	unsigned char* idata_org = *data;
+	*data = (unsigned char* ) malloc(sizeof(unsigned char) * size * 4);
+	unsigned char *ptr = *data;
+//data is output
+	for (int i = 0; i < size; i++){
+		*ptr++ = itr->r;
+		*ptr++ = itr->g;
+		*ptr++ = itr->b;
+		*ptr++ = 0;
+		itr++;
+	}	
+	free(idata_org);
+	return true;
+}
+void cu_cleanup()
+{
+	//sdkDeleteTimer(&timer);
+checkCudaErrors(cudaFree(d_img));
+checkCudaErrors(cudaFree(d_temp));
+}
 
 void normalize(std::vector<float> &mask)
 {
@@ -115,6 +184,28 @@ void iSmooth(Mat &src, float sigma, Mat &out) {
 			const double timeSec = (getTickCount() - start) / getTickFrequency();
 			cout << "1 call iSmooth time : " << timeSec << " sec" << endl;
 }
+
+void iSmooth(unsigned int *&d_img, float sigma, unsigned char *&out){
+unsigned int *d_result;
+int device;
+unsigned int size; // = cu_width * cu_height*sizeof (unsigned int);
+//sdkLoadPPM4ub(image_path, (unsigned char **)&h_img, &cu_width, &cu_height);
+
+struct cudaDeviceProp prop;
+cudaGetDeviceProperties(&prop, device);
+//init GL
+//init cuda
+//initCudaBuffers();
+
+//gaussianFilterRGBA(d_img, d_result, d_temp, cu_width, cu_height, sigma_color, order, nthreads);
+checkCudaErrors(cudaDeviceSynchronize());
+
+//unsigned char *h_result =(unsigned char *)malloc(cu_width*cu_height*4);
+//checkCudaErrors(cudaMemcpy(h_result, d_result, cu_width*cu_height*4, cudaMemcpyDeviceToHost));
+
+//out = h_result;
+}
+
 
 void iBuildGraph(const PointCloud<PointXYZRGBA> &in,
 				 float sigma_depth,
@@ -421,6 +512,29 @@ void iBuildGraph(const deque< PointCloud<PointXYZRGBA> > &clouds,
 	}
 	Mat R,G,B,D, smooth_r, smooth_g, smooth_b, smooth_d;
 
+unsigned char **data;
+readPCD2RGBA(clouds[0], (unsigned char **)&h_img, width, height);
+
+unsigned int *d_result;
+int device;
+unsigned int size = width * height*sizeof (unsigned int);
+//sdkLoadPPM4ub(image_path, (unsigned char **)&h_img, &cu_width, &cu_height);
+
+struct cudaDeviceProp prop;
+//cudaGetDeviceProperties(&prop, device);
+//init GL
+//init cuda
+initCudaBuffers(width, height );
+printf("init cuda\n");
+
+//gaussianFilterRGBA(d_img, d_result, d_temp, width, height, sigma_color, order, nthreads);
+printf("filter\n");
+//checkCudaErrors(cudaDeviceSynchronize());
+
+unsigned char *h_result =(unsigned char *)malloc(width*height*4);
+//checkCudaErrors(cudaMemcpy(h_result, d_result, width*height*4, cudaMemcpyDeviceToHost));
+
+//std::cout<< **data
 	Edge3D *p = edges;
 	Mat_<float> past_r,past_g,past_b,past_d;
 	for( int z = 0; z < NUM_FRAMES; z++) {
@@ -428,7 +542,7 @@ void iBuildGraph(const deque< PointCloud<PointXYZRGBA> > &clouds,
 		iSmooth(B, sigma_color, smooth_b);
 		iSmooth(G, sigma_color, smooth_g);
 		iSmooth(R, sigma_color, smooth_r);
-printf("iBuild deque 3 times");
+//printf("iBuild deque 3 times");
 		if(sigma_depth == 0)
 			smooth_d = D;
 		else
@@ -1193,7 +1307,7 @@ int Segment4DBig::AddSlice(
 			flows.push_back(tmp_flow);
 		} else {
 			//printf("Computing flow\n");
-			std::cout<<"11111\n";
+		//	std::cout<<"11111\n";
 			PointCloud<Normal> tmp_flow;
 			PointCloudBgr tmp_cloud = *(clouds.rbegin() + 1);
 			ComputeOpticalFlow(tmp_cloud, in, &tmp_flow);
@@ -1322,10 +1436,10 @@ int Segment4DBig::AddSlice(
 			PointCloudBgr::Ptr ptr_in(new PointCloudBgr);
 			*ptr_in = in;
 	//		ComputeOpticalFlowGPU(ptr_cloud, ptr_in, ptr_flow);
-			const int64 start = getTickCount();
+//			const int64 start = getTickCount();
 			ComputeOpticalFlow(tmp_cloud, in, &tmp_flow);
-			const double timeSec = (getTickCount() - start) / getTickFrequency();
-			cout << "GPU OF : " << timeSec << " sec" << endl;
+//			const double timeSec = (getTickCount() - start) / getTickFrequency();
+//			cout << "GPU OF : " << timeSec << " sec" << endl;
 			flows.push_back(tmp_flow);
 		}
 		if(clouds.size() > NUM_FRAMES) {
