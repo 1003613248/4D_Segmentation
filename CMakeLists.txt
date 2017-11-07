@@ -41,7 +41,7 @@ add_definitions(${CUDA_DEFINITIONS})
 set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} -gencode arch=compute_30,code=sm_30)
 
 file( GLOB  cu  *.cu)
-cuda_add_executable( vector src/vector_add.cpp ${cu} )
+cuda_add_executable( vector src/vector_add.cu ${cu} )
 #target_link_libraries(vector_add ${CUDA_LIBRARIES})
 #cuda_add_executable( cuFilter src/recursiveGaussian_cuda.cu  src/cuFilter.cpp ${cu} ${CUDA_LIBS} ${OPENGL_LIBRARIES} ${GLUT_LIBRARIES} )
 
@@ -66,11 +66,14 @@ target_link_libraries (Test_Seg ${cu} ${OPENGL_LIBRARIES} ${PCL_LIBRARIES} ${Ope
 
 #add_executable (pcd2ppm src/pcd2ppm.cpp)
 #target_link_libraries(pcd2ppm ${PCL_LIBRARIES} ${CUDA_LIBRARIES})
-#add_executable (pcdDepth2ppm src/pcdDepth2ppm.cpp)
-#target_link_libraries(pcdDepth2ppm ${PCL_LIBRARIES} ${CUDA_LIBRARIES})
+add_executable (pcdDepth2ppm src/pcdDepth2ppm.cpp)
+target_link_libraries(pcdDepth2ppm ${PCL_LIBRARIES} ${CUDA_LIBRARIES})
 #cuda_add_library  (recursiveCUDA src/recursiveGaussian_cuda.cu ${cu} ${CUDA_HEADS})
 #target_link_libraries(recursiveCUDA ${CUDA_LIBRARIES})
 #add_library (recursiveCPP src/cuFilter.cpp ${4D_Segmentation_HEADERS} ${cu} ${CUDA_HEADS})
 #target_link_libraries(recursiveCPP ${CUDA_LIBRARIES})
 cuda_add_executable (cuFilter src/cuFilter.cpp src/recursiveGaussian_cuda.cu ${CUDA_HEADS} ${cu})
 target_link_libraries(cuFilter ${CUDA_LIBRARIES} ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
+
+cuda_add_executable (mst mst/kernels.cuh mst/segmentationTree.cu ${CUDA_HEADS} )
+target_link_libraries (mst ${cu} ${OPENGL_LIBRARIES} ${CUDA_LIBRARIES} ${GLUT_LIBRARIES}) 
