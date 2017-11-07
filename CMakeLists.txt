@@ -77,3 +77,5 @@ target_link_libraries(cuFilter ${CUDA_LIBRARIES} ${GLUT_LIBRARIES} ${OPENGL_LIBR
 
 cuda_add_executable (mst mst/kernels.cuh mst/segmentationTree.cu ${CUDA_HEADS} )
 target_link_libraries (mst ${cu} ${OPENGL_LIBRARIES} ${CUDA_LIBRARIES} ${GLUT_LIBRARIES}) 
+cuda_add_executable (hso hso/flowGold.cpp hso/flowCUDA.cu hso/main.cpp ${CUDA_HEADS})
+target_link_libraries (hso ${cu} ${OPENGL_LIBRARIES} ${CUDA_LIBRARIES} ${GLUT_LIBRARIES}) 
