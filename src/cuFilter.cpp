@@ -424,19 +424,15 @@ for(int n = 1;n<= 827; n++){
 
 
     // load image
-
+///////////////use these two lines for reading hundreds of imgs/// 
 char image_path[1024];
 sprintf(image_path, "/home/wine/rgbd_dataset_freiburg3_walking_xyz/rgbppm/%d.ppm", n);
+//////////////////////////////////////////
 
-   // char *image_path = sdkFindFilePath(image_filename, argv[0]);
+/////////////////////use this line when loading a single img///////////
 //    char *image_path = sdkFindFilePath(image_filename, argv[0]);
+//////////////////////////////////////////////////////////////////
 
-   /* if (image_path == NULL)
-    {
-        fprintf(stderr, "Error unable to find and load image file: '%s'\n", image_filename);//image_filename;
-        exit(EXIT_FAILURE);
-    }
-*/
     sdkLoadPPM4ub(image_path, (unsigned char **)&h_img, &width, &height);
 															
     if (!h_img)

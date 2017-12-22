@@ -60,6 +60,10 @@ include_directories(${4D_Segmentation_INCLUDE_DIRS})
 #cuda_add_library (4D_Segmentation src/4D_Segmentation.cpp src/recursiveGaussian_cuda.cu src/GraphSegmentation.cpp src/RegionTree.cpp  src/OpticalFlow.cpp ${CUDA_HEADS} ${cu}  ${4D_Segmentation_HEADERS})
 #target_link_libraries (4D_Segmentation ${PCL_LIBRARIES} ${OpenCV_LIBS} ${TBB_LIBRARIES} ${OpenGL_LIBRARIES} ${CUDA_LIBS} ${GLUT_LIBRARIES} ${cu})
 
+add_executable (jpg2ppm src/jpg2ppm.cpp)
+target_link_libraries (jpg2ppm ${OpenCV_LIBS})
+#must be OpenCV_LIBS !
+
 cuda_add_executable (Test_Seg src/TestVideoSegmentation.cpp src/4D_Segmentation.cpp src/recursiveGaussian_cuda.cu src/GraphSegmentation.cpp src/RegionTree.cpp  src/OpticalFlow.cpp ${cu} ${4D_Segmentation_HEADERS} ${CUDA_HEADS})
 target_link_libraries (Test_Seg ${cu} ${OPENGL_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBS} tbb ${CUDA_LIBRARIES} ${GLUT_LIBRARIES})
 #target_link_libraries (Test_Seg 4D_Segmentation ${cu} ${OPENGL_LIBRARIES} ${PCL_LIBRARIES} ${OpenCV_LIBS} tbb ${CUDA_LIBRARIES} ${GLUT_LIBRARIES})
@@ -79,3 +83,5 @@ cuda_add_executable (mst mst/kernels.cuh mst/segmentationTree.cu ${CUDA_HEADS} )
 target_link_libraries (mst ${cu} ${OPENGL_LIBRARIES} ${CUDA_LIBRARIES} ${GLUT_LIBRARIES}) 
 cuda_add_executable (hso hso/flowGold.cpp hso/flowCUDA.cu hso/main.cpp ${CUDA_HEADS})
 target_link_libraries (hso ${cu} ${OPENGL_LIBRARIES} ${CUDA_LIBRARIES} ${GLUT_LIBRARIES}) 
+cuda_add_executable (hist hist/histogram_gold.cpp hist/histogram256.cu hist/main.cpp hist/histogram64.cu ${CUDA_HEADS})
+target_link_libraries (hist ${cu} ${OPENGL_LIBRARIES} ${CUDA_LIBRARIES} ${GLUT_LIBRARIES}) 

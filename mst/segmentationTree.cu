@@ -1004,7 +1004,7 @@ void buildGraph(const vector<uchar3> &image,
     }
 }
 
-static char *kDefaultImageName = (char*)"1.ppm";
+static char *kDefaultImageName = (char*)"0.ppm";
 
 int main(int argc, char **argv)
 {

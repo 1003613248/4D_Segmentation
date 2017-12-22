@@ -520,18 +520,18 @@ int device;
 unsigned int size = width * height*sizeof (unsigned int);
 //sdkLoadPPM4ub(image_path, (unsigned char **)&h_img, &cu_width, &cu_height);
 
-struct cudaDeviceProp prop;
+//struct cudaDeviceProp prop;
 //cudaGetDeviceProperties(&prop, device);
 //init GL
 //init cuda
-initCudaBuffers(width, height );
-printf("init cuda\n");
+//initCudaBuffers(width, height );
+//printf("init cuda\n");
 
 //gaussianFilterRGBA(d_img, d_result, d_temp, width, height, sigma_color, order, nthreads);
-printf("filter\n");
+//printf("filter\n");
 //checkCudaErrors(cudaDeviceSynchronize());
 
-unsigned char *h_result =(unsigned char *)malloc(width*height*4);
+//unsigned char *h_result =(unsigned char *)malloc(width*height*4);
 //checkCudaErrors(cudaMemcpy(h_result, d_result, width*height*4, cudaMemcpyDeviceToHost));
 
 //std::cout<< **data
